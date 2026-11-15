@@ -3,6 +3,7 @@ export const SHOP = {
   name: "Your Shop Name",
   phone: "01XXXXXXXXX",
   whatsapp: "8801XXXXXXXXX",
+  bkash: "01XXXXXXXXX", // your bKash personal/merchant number
 };
 
 export const PRICE = { now: 2450, old: 3500 };

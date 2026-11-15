@@ -17,6 +17,7 @@ export async function POST(req: Request) {
   const order = {
     name, phone, address,
     package: pkg.label, shipping: ship.label,
+    payment: body?.payment === "bkash" ? "bKash" : "Cash on delivery",
     total: pkg.price + ship.cost,
     createdAt: new Date().toISOString(),
   };

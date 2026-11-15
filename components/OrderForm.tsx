@@ -2,7 +2,7 @@
 import { useState, FormEvent } from "react";
 import Image from "next/image";
 import { PartyPopper, Banknote, CircleCheck, Lock, Loader2 } from "lucide-react";
-import { PACKAGES, SHIPPING, bn } from "@/lib/data";
+import { PACKAGES, SHIPPING, SHOP, bn } from "@/lib/data";
 
 export default function OrderForm() {
   const [pkg, setPkg] = useState(PACKAGES[0].id);
@@ -11,6 +11,7 @@ export default function OrderForm() {
   const [phone, setPhone] = useState("");
   const [addr, setAddr] = useState("");
   const [tried, setTried] = useState(false);
+  const [pay, setPay] = useState<"cod" | "bkash">("cod");
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
 
   const p = PACKAGES.find((x) => x.id === pkg)!;
@@ -18,8 +19,11 @@ export default function OrderForm() {
   const total = p.price + s.cost;
   const phoneOk = /^01[3-9]\d{8}$/.test(phone.trim());
 
-  async function submit(e: FormEvent) {
+  async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const method = submitter?.value === "bkash" ? "bkash" : "cod";
+    setPay(method);
     setTried(true);
     if (!phoneOk || !name.trim() || !addr.trim()) return;
     setStatus("sending");
@@ -27,7 +31,7 @@ export default function OrderForm() {
       const res = await fetch("/api/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, address: addr, package: pkg, shipping: ship }),
+        body: JSON.stringify({ name, phone, address: addr, package: pkg, shipping: ship, payment: method }),
       });
       setStatus(res.ok ? "done" : "error");
     } catch {
@@ -40,7 +44,15 @@ export default function OrderForm() {
       <div className="thanks" style={{ display: "block" }}>
         <div className="ic"><PartyPopper size={64} /></div>
         <h2>ধন্যবাদ! আপনার অর্ডার পেয়েছি</h2>
-        <p>খুব শীঘ্রই আমাদের প্রতিনিধি আপনাকে ফোন করে অর্ডার কনফার্ম করবেন।</p>
+        {pay === "bkash" ? (
+          <div className="bkash-info">
+            <p>অনুগ্রহ করে <b>৳{bn(total)}</b> নিচের নম্বরে bKash <b>Send Money</b> করুন:</p>
+            <div className="bkash-num">{SHOP.bkash}</div>
+            <p>রেফারেন্সে আপনার মোবাইল নম্বর লিখুন। পেমেন্ট পেলে আমরা ফোন করে অর্ডার কনফার্ম করব।</p>
+          </div>
+        ) : (
+          <p>খুব শীঘ্রই আমাদের প্রতিনিধি আপনাকে ফোন করে অর্ডার কনফার্ম করবেন।</p>
+        )}
       </div>
     );
 
@@ -86,8 +98,12 @@ export default function OrderForm() {
       </div>
       <div className="cod"><Banknote size={22} /> <span>ক্যাশ অন ডেলিভারি — পণ্য হাতে পেয়ে চেক করে টাকা দিন। অর্ডারের পর আমরা ফোন করে কনফার্ম করব।</span></div>
       {status === "error" && <p className="err" style={{ display: "block", marginBottom: 10 }}>অর্ডার পাঠানো যায়নি, আবার চেষ্টা করুন বা কল করুন।</p>}
-      <button type="submit" className="btn block" disabled={status === "sending"}>
+      <button type="submit" value="cod" className="btn block" disabled={status === "sending"}>
         {status === "sending" ? <><Loader2 size={20} className="spin" /> পাঠানো হচ্ছে...</> : <><CircleCheck size={22} /> অর্ডার কনফার্ম করুন — ৳{bn(total)}</>}
+      </button>
+      <div className="or"><span>অথবা</span></div>
+      <button type="submit" value="bkash" className="btn block bkash" disabled={status === "sending"}>
+        bKash এ পেমেন্ট করুন — ৳{bn(total)}
       </button>
       <p className="secure"><Lock size={13} /> আপনার তথ্য সম্পূর্ণ নিরাপদ — শুধু ডেলিভারির জন্য ব্যবহার হবে</p>
     </form>

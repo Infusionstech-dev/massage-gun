@@ -210,3 +210,12 @@ svg{flex-shrink:0}
 .spin{animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .sticky .wa{color:#fff}
+
+/* bKash */
+.or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:14px;margin:14px 0}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.btn.bkash{background:linear-gradient(180deg,#ef2f86,#e2136e);box-shadow:0 6px 0 #b30f57,0 14px 30px rgba(226,19,110,.3)}
+.btn.bkash:active{box-shadow:0 2px 0 #b30f57}
+.bkash-info{background:#fdf0f6;border:1px solid #f7c4dc;border-radius:16px;padding:18px;margin-top:10px}
+.bkash-info p{color:var(--ink)}
+.bkash-num{font-family:var(--font-display);font-size:30px;font-weight:700;color:#e2136e;margin:8px 0;letter-spacing:.04em}
